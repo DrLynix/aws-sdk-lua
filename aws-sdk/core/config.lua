@@ -65,14 +65,16 @@ end
 function M.use_corohttp()
 	local http = require("coro-http")
 	config.http_request = function(uri, method, headers, post_data, callback)
-		local h = {}
-		for k,v in pairs(headers) do
-			table.insert(h, {k, v})
-		end
+		coroutine.wrap(function()
+			local h = {}
+			for k,v in pairs(headers) do
+				table.insert(h, {k, v})
+			end
 
-		local header, body = http.request(method, uri, h, post_data)
-		callback({ status = header.code, response = body, headers = header })
-	end)()
+			local header, body = http.request(method, uri, h, post_data)
+			callback({ status = header.code, response = body, headers = header })
+		end)()
+	end
 end
 
 return M
